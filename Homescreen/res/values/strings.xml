@@ -33,4 +33,18 @@
         
     </i></b></string>
 
+
+<!-- new strings -->
+    <string name="connection">Connection</string>
+    <string name="vibration">Vibration</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="v_off">Off</string>
+    <string name="v_low">Low</string>
+    <string name="v_high">High</string>
+    <string name="dialog_title">Select your GWatch</string>
+    <string name="sync_time">Sync Time</string>
+    <string name="notification">Notification</string>
+
+
 </resources>

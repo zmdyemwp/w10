@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name="button_normal_bright" >#eeeeee</color>
+    <color name="button_normal_dark" >#aaaaaa</color>
+    <color name="button_focused" >#ff7f27</color>
+    <color name="button_pressed" >#ff7f27</color>
+    <color name="button_edge" >#000000</color>
+	
+	<color name="dialog_bg" >#324b6d</color>
+	<color name="dialog_select" >#7d9bc4</color>
+    
+</resources>
