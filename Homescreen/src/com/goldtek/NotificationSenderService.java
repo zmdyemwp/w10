@@ -164,6 +164,16 @@ public class NotificationSenderService extends Service
 			    		new DisConnectBT().execute();			    			
 			        }
 			        
+			        if(action == "GET_VIBRATION_LEVEL") {
+			        }
+			        
+			        if(action == "SET_VIBRATION_LEVEL") {
+			        }
+			        
+			        if(action == "SET_TIME") {
+			        }
+
+
 			        if(action == "GOLDTEK_WATCH") {
 			        	String senderId = intent.getStringExtra("sender");
 			        	String messageBody = intent.getStringExtra("message");

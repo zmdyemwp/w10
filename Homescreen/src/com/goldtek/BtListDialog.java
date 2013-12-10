@@ -54,7 +54,7 @@ public class BtListDialog extends DialogFragment {
 			} else {
 				v = mInflater.inflate(resource, parent, false);
 				BluetoothDevice dev = mobjs.get(position);
-				((TextView)v.findViewById(R.id.devName))
+				((TextView)v.findViewById(R.id.connState))
 					.setText(dev.getName());
 				((TextView)v.findViewById(R.id.btAddr))
 				.setText(dev.getAddress());
@@ -65,6 +65,7 @@ public class BtListDialog extends DialogFragment {
 
 	public void connect2Dev(BluetoothDevice dev) {
 		//	TODO: send intent to NotificationSenderService
+		//		TODO: connect to device
 		Intent localIntent2 = new Intent(getActivity(), NotificationSenderService.class);
         localIntent2.setAction("CONNECT_TO_BT");
         localIntent2.putExtra("mybtdevice", dev);
@@ -77,6 +78,8 @@ public class BtListDialog extends DialogFragment {
 	static public void disconnectFromDev(Context ct) {
 		final String packageName = "com.goldtek";
 		final String className = "NotificationSenderService";
+		//	TODO: send intent to NotificationSenderService
+		//		TODO: disconnect from device
 		Intent localIntent3 = new Intent();			
 		localIntent3.setAction("DISCONNECT_TO_BT");
 		localIntent3.putExtra("userDisconnect", true);

@@ -23,7 +23,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/devName"
+                android:id="@+id/connState"
                 android:layout_width="match_parent"
                 android:layout_height="0dip"
                 android:layout_marginBottom="10dp"
@@ -74,7 +74,7 @@
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <RadioGroup
-                android:id="@+id/radioGroup1"
+                android:id="@+id/vibrationOpt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
