@@ -82,11 +82,16 @@ public class BtListDialog extends DialogFragment {
 		//		TODO: disconnect from device
 		Intent localIntent3 = new Intent();			
 		localIntent3.setAction("DISCONNECT_TO_BT");
-		localIntent3.putExtra("userDisconnect", true);
 		localIntent3.putExtra("mybtdevice", currentDev);
 		localIntent3.putExtra("mybtuuid", mDeviceUUID.toString());
 		localIntent3.putExtra("mybuffersize", mMaxChars);
-		localIntent3.setClassName(packageName, packageName + "." + className);	
+		localIntent3.putExtra("userDisconnect", true);
+		localIntent3.setClassName(packageName, packageName + "." + className);
+		{
+			String s1 = packageName;
+			String s2 = packageName + "." + className;
+			Log.d("disconnectFromDev", s1+"/"+s2);
+		}
 		ct.startService(localIntent3);
 		currentDev = null;
 	}

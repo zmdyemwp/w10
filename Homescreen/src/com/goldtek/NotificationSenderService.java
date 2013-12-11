@@ -379,7 +379,9 @@ public class NotificationSenderService extends Service
 			}
 
 			try {
-				mBTSocket.close();
+				if(null != mBTSocket) {
+					mBTSocket.close();
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -395,6 +397,7 @@ public class NotificationSenderService extends Service
 			if (mIsUserInitiatedDisconnect) {
 				//finish(); TODO
 			}
+			SendConnState(false);
 		}
 
 	}
@@ -438,21 +441,33 @@ public class NotificationSenderService extends Service
 				Log.d(TAG,"Could not connect to device. " +
 						"Is it a Serial device? Also check if the UUID is correct in the settings" );
 				//Toast.makeText(getApplicationContext(), "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
-				//finish(); TODO robin need to do soemthing here
+				//finish(); TODO robin need to do something here
 				Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :4" );
+
 			} else {
 				//msg("Connected to device");
 				Log.d(TAG,"Connected to device" );
 				mIsBluetoothConnected = true;
 				mReadThread = new ReadInput(); // Kick off input reader
+
 			}
 
+			SendConnState(mConnectSuccessful);
 			//progressDialog.dismiss();
 		}
 
 	}
 
-  
+    void SendConnState(boolean bConn) {
+    	Log.d(TAG, (bConn)?"Connected":"Disconnected");
+    	Intent i = new Intent();
+		Bundle b = new Bundle();
+		b.putInt(CosmosMsg.msg, CosmosMsg.CONNECTION_STATUS_CHANGE);
+		b.putInt(CosmosMsg.value, (bConn)?1:0);
+		i.putExtras(b);
+		i.setAction(CosmosMsg.notifyAction);
+		sendBroadcast(i);
+    }
 
   
   

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -15,11 +16,9 @@ import android.widget.TextView;
 
 public class NewMainActivity extends Activity {
 
-	TextView	tvConnection = (TextView)findViewById(R.id.connState);
-	RadioGroup	rgVibration = (RadioGroup)findViewById(R.id.vibrationOpt);
-	
-	final public String notifyAction =
-			"com.goldtek.receiver.for.broadcast.from.notification.sender.service";  
+	TextView	tvConnection;
+	RadioGroup	rgVibration;
+	  
 	public BroadcastReceiver bcReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -31,6 +30,7 @@ public class NewMainActivity extends Activity {
 	};
 	
 	public void doRefresh(int msg, int value) {
+		Log.d("doRefresh", "msg:"+msg+",value:"+value);
 		switch (msg) {
 		case CosmosMsg.CONNECTION_STATUS_CHANGE:
 			tvConnection
@@ -57,18 +57,35 @@ public class NewMainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
-		registerReceiver(bcReceiver, new IntentFilter(notifyAction));
+		try {
+			registerReceiver(bcReceiver, new IntentFilter(CosmosMsg.notifyAction));
+		} catch(Throwable e) {
+			Log.d("registerReceiver", e.getLocalizedMessage());
+		}
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_main);
 
+		tvConnection = (TextView)findViewById(R.id.connState);
+		rgVibration = (RadioGroup)findViewById(R.id.vibrationOpt);
+		
 		View actionBarView = getLayoutInflater().inflate(R.layout.goldtek_action_bar, null);
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		actionBar.setCustomView(actionBarView);
 		((Button)findViewById(R.id.Connect)).setOnClickListener(doConnect);
+		((Button)findViewById(R.id.Disconnect)).setOnClickListener(doDisconnect);
 	}
 
+	public void onDestroy() {
+		try {
+			unregisterReceiver(bcReceiver);
+		} catch(Throwable e) {
+			Log.d("unregisterReceiver", e.getLocalizedMessage());
+		}
+		super.onDestroy();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -80,6 +97,7 @@ public class NewMainActivity extends Activity {
 		
 		@Override
 		public void onClick(View v) {
+			tvConnection.setText(R.string.connecting);
 			//	TODO: Show the paired BT devices
 			android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
 	        android.app.Fragment prev = getFragmentManager().findFragmentByTag("btlistdialog");
