@@ -170,12 +170,23 @@ public class NotificationSenderService extends Service
 			        }
 			        
 			        if(action == CosmosMsg.GET_VIBRATION_LEVEL) {
-			        	writeCmdTowatch("GETNALARM=");
-			        	SendVibrationLevel(mCurrentVibrationLevel);
+			        	doGetVibrationLevel();
 			        }
 
 			        if(action == CosmosMsg.SET_VIBRATION_LEVEL) {
-			        	writeCmdTowatch("+SETNALARM=0,500");
+			        	mCurrentVibrationLevel = intent.getIntExtra(CosmosMsg.VLevel, R.id.vOff);
+			        	if(R.id.vOn == mCurrentVibrationLevel) {
+			        		writeCmdTowatch("SETNALARM=0,500");
+			        	} else {
+			        		writeCmdTowatch("SETNALARM=0,0");
+			        	}
+			        	try {
+			        		Thread.sleep(1000);
+			        	} catch(Throwable e) {
+			        		e.getLocalizedMessage();
+			        	}
+			        	//		Get the real setting from GWatch
+			        	doGetVibrationLevel();
 			        }
 
 			        if(action == CosmosMsg.SET_CURRENT_TIME) {
@@ -189,8 +200,8 @@ public class NotificationSenderService extends Service
 			        			c.get(Calendar.MINUTE),
 			        			c.get(Calendar.SECOND)).toString();
 			        	Log.d("SET_CURRENT_TIME", s);
-			        	//writeCmdTowatch(s);
-			        	writeTowatch("Test", "Test");
+			        	writeCmdTowatch(s);
+			        	//writeTowatch("Test", "Test");
 			        }
 
 			        if(action == "GOLDTEK_WATCH") {
@@ -206,6 +217,13 @@ public class NotificationSenderService extends Service
 				return START_STICKY;
 	 }	
 
+	
+	private void doGetVibrationLevel() {
+		writeCmdTowatch("GETNALARM=");
+    	//	TODO: parse the result in read thread but not here!
+    	SendVibrationLevel(mCurrentVibrationLevel);
+	}
+	
 		public void writeCmdTowatch(String cmd) {
 			if (mBTSocket !=null && mIsBluetoothConnected  ) {
 				String str ="SPP+"+cmd+"\r\0";
@@ -345,6 +363,22 @@ public class NotificationSenderService extends Service
 						final String strInput = new String(buffer, 0, i);
 
 						Log.d("Recv", strInput);
+
+						
+						//	TODO: parse the result
+						if(strInput.contains(CosmosMsg.SET_VIBRATION_RESULT_TAG)) {
+							int start = 0;
+							int end = 0;
+							start = strInput.indexOf(',');
+							start = strInput.subSequence(start+1, strInput.length())
+									.toString().indexOf(',');
+							end = strInput.indexOf('\r');
+							if(0 == Integer.valueOf(strInput.substring(start, end))) {
+								SendVibrationLevel(R.id.vOff);
+							} else {
+								SendVibrationLevel(R.id.vOn);
+							}
+						}
 						
 						/*
 						 * If checked then receive text, better design would probably be to stop thread if unchecked and free resources, but this is a quick fix

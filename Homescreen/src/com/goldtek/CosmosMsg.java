@@ -20,4 +20,6 @@ public class CosmosMsg {
 	public static final int CONNECTION_STATUS_CHANGE = 0;
 	public static final int VIBRATION_LEVEL_CHANGE = 1;
 
+	//		SPP result TAG
+	public static final String SET_VIBRATION_RESULT_TAG = "GETNALARM";
 }

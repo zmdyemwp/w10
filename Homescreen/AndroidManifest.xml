@@ -83,6 +83,7 @@
         
         <activity
             android:name="com.goldtek.CosMosActivity"
+            android:screenOrientation="portrait"
             android:label="@string/accessibility_service">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

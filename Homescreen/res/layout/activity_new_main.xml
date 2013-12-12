@@ -88,18 +88,11 @@
                     android:text="@string/v_off" />
 
                 <RadioButton
-                    android:id="@+id/vLow"
+                    android:id="@+id/vOn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/v_low" />
-
-                <RadioButton
-                    android:id="@+id/vHigh"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/v_high" />
+                    android:text="@string/v_on" />
             </RadioGroup>
         </LinearLayout>
 

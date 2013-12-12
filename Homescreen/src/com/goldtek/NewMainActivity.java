@@ -79,8 +79,9 @@ public class NewMainActivity extends Activity {
 		((Button)findViewById(R.id.syncTime)).setOnClickListener(doSyncTime);
 		
 		((Button)findViewById(R.id.vOff)).setOnClickListener(doSetVibrationLevel);
-		((Button)findViewById(R.id.vLow)).setOnClickListener(doSetVibrationLevel);
-		((Button)findViewById(R.id.vHigh)).setOnClickListener(doSetVibrationLevel);
+		((Button)findViewById(R.id.vOn)).setOnClickListener(doSetVibrationLevel);
+		
+		((Button)findViewById(R.id.notifySet)).setOnClickListener(doNotification);
 		
 		this.doGetConnectionStatus();
 		this.doGetVibrationLevel();
@@ -162,6 +163,16 @@ public class NewMainActivity extends Activity {
 		}
 	};
 	
+	View.OnClickListener doNotification = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			Intent intent = new Intent(getApplicationContext(), CosMosActivity.class);
+			startActivity(intent);
+		}
+	};
+
+
 	void doGetVibrationLevel() {
 		Intent intent = new Intent(this, NotificationSenderService.class);
 		intent.setAction(CosmosMsg.GET_VIBRATION_LEVEL);
