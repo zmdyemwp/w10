@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
@@ -39,7 +40,7 @@ public class NewMainActivity extends Activity {
 							R.string.disconnected:R.string.connected));
 			break;
 		case CosmosMsg.VIBRATION_LEVEL_CHANGE:
-			
+			rgVibration.check(value);
 			break;
 		default:
 			break;
@@ -75,6 +76,14 @@ public class NewMainActivity extends Activity {
 		actionBar.setCustomView(actionBarView);
 		((Button)findViewById(R.id.Connect)).setOnClickListener(doConnect);
 		((Button)findViewById(R.id.Disconnect)).setOnClickListener(doDisconnect);
+		((Button)findViewById(R.id.syncTime)).setOnClickListener(doSyncTime);
+		
+		((Button)findViewById(R.id.vOff)).setOnClickListener(doSetVibrationLevel);
+		((Button)findViewById(R.id.vLow)).setOnClickListener(doSetVibrationLevel);
+		((Button)findViewById(R.id.vHigh)).setOnClickListener(doSetVibrationLevel);
+		
+		this.doGetConnectionStatus();
+		this.doGetVibrationLevel();
 	}
 
 	public void onDestroy() {
@@ -85,13 +94,27 @@ public class NewMainActivity extends Activity {
 		}
 		super.onDestroy();
 	}
-	
+
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		//getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.homescreen, menu);
 		return true;
 	}
+	private static final int SETTINGS = 20;
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			Intent intent = new Intent(this, PreferencesActivity.class);
+			startActivityForResult(intent, SETTINGS);
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+
 
 	View.OnClickListener doConnect = new View.OnClickListener() {
 		
@@ -119,5 +142,36 @@ public class NewMainActivity extends Activity {
 			BtListDialog.disconnectFromDev(v.getContext());
 		}
 	};
+	
+	View.OnClickListener doSetVibrationLevel = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getApplication(), NotificationSenderService.class);
+			intent.setAction(CosmosMsg.SET_VIBRATION_LEVEL);
+			intent.putExtra(CosmosMsg.VLevel, v.getId());
+			startService(intent);
+		}
+	};
+
+	View.OnClickListener doSyncTime = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getApplication(), NotificationSenderService.class);
+			intent.setAction(CosmosMsg.SET_CURRENT_TIME);
+			startService(intent);
+		}
+	};
+	
+	void doGetVibrationLevel() {
+		Intent intent = new Intent(this, NotificationSenderService.class);
+		intent.setAction(CosmosMsg.GET_VIBRATION_LEVEL);
+		startService(intent);
+	}
+
+	void doGetConnectionStatus() {
+		Intent intent = new Intent(this, NotificationSenderService.class);
+		intent.setAction(CosmosMsg.GET_CONNECTION_STATUS);
+		startService(intent);
+	}
 	
 }

@@ -8,6 +8,12 @@
 
 package com.goldtek;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Calendar;
+import java.util.TimeZone;
+import java.util.UUID;
+
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.app.Service;
@@ -18,29 +24,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.provider.CallLog.Calls;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
+import 	java.util.Formatter;
 import android.widget.Toast;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.UUID;
 
 public class NotificationSenderService extends Service
 {
@@ -64,6 +58,8 @@ public class NotificationSenderService extends Service
 	 private boolean mIsUserInitiatedDisconnect = false;
 	 
 	 private boolean mIsBluetoothConnected = false;
+	 
+	 private int mCurrentVibrationLevel = R.id.vOff;
 
 	 private BluetoothDevice mDevice;
 
@@ -138,7 +134,7 @@ public class NotificationSenderService extends Service
 			        	Log.d(TAG,"SMS:" + smsreceived);
 			        	writeTowatch( "SMS", smsreceived);
 			        }
-			        
+
 			        if(action == "CONNECT_TO_BT"){
 			        	//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> 1:" );			        	
 			        	Bundle b = intent.getExtras();
@@ -154,6 +150,7 @@ public class NotificationSenderService extends Service
 			    			new ConnectBT().execute();
 			    		}   	
 			        }
+
 			        if(action == "DISCONNECT_TO_BT"){
 			        	Bundle b = intent.getExtras();
 			        	mDevice = b.getParcelable("mybtdevice");			    					    		
@@ -164,15 +161,37 @@ public class NotificationSenderService extends Service
 			    		new DisConnectBT().execute();			    			
 			        }
 			        
-			        if(action == "GET_VIBRATION_LEVEL") {
+			      
+			        //	TODO
+			        //	TODO
+			        //	TODO
+			        if(action == CosmosMsg.GET_CONNECTION_STATUS) {
+			        	SendConnState(mIsBluetoothConnected);
 			        }
 			        
-			        if(action == "SET_VIBRATION_LEVEL") {
-			        }
-			        
-			        if(action == "SET_TIME") {
+			        if(action == CosmosMsg.GET_VIBRATION_LEVEL) {
+			        	writeCmdTowatch("GETNALARM=");
+			        	SendVibrationLevel(mCurrentVibrationLevel);
 			        }
 
+			        if(action == CosmosMsg.SET_VIBRATION_LEVEL) {
+			        	writeCmdTowatch("+SETNALARM=0,500");
+			        }
+
+			        if(action == CosmosMsg.SET_CURRENT_TIME) {
+			        	Calendar c = Calendar.getInstance();
+			        	Formatter f = new Formatter();
+			        	String s = f.format("SETTIME=%d,%d,%d,%d,%d,%d,",
+			        			c.get(Calendar.YEAR),
+			        			c.get(Calendar.MONTH),
+			        			c.get(Calendar.DAY_OF_MONTH),
+			        			c.get(Calendar.HOUR),
+			        			c.get(Calendar.MINUTE),
+			        			c.get(Calendar.SECOND)).toString();
+			        	Log.d("SET_CURRENT_TIME", s);
+			        	//writeCmdTowatch(s);
+			        	writeTowatch("Test", "Test");
+			        }
 
 			        if(action == "GOLDTEK_WATCH") {
 			        	String senderId = intent.getStringExtra("sender");
@@ -187,12 +206,25 @@ public class NotificationSenderService extends Service
 				return START_STICKY;
 	 }	
 
+		public void writeCmdTowatch(String cmd) {
+			if (mBTSocket !=null && mIsBluetoothConnected  ) {
+				String str ="SPP+"+cmd+"\r\0";
+				try {
+					mBTSocket.getOutputStream().write(str.getBytes());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	
+	
    public void writeTowatch( String sender, String msg){
 		
 	   if (mBTSocket !=null && mIsBluetoothConnected  ) {
 		   
 		   //SPP+NOTIFY=<Head>,<Content1>\r\0
-		     String str ="SPP+NOTIFY="+sender+","+msg+"\r\0";
+		     String str ="SPP+NOTIFY="+sender+","+msg.length()+","+msg+"\r\0";
 		   
 				   try {
 						mBTSocket.getOutputStream().write(str.getBytes());
@@ -312,6 +344,8 @@ public class NotificationSenderService extends Service
 						}
 						final String strInput = new String(buffer, 0, i);
 
+						Log.d("Recv", strInput);
+						
 						/*
 						 * If checked then receive text, better design would probably be to stop thread if unchecked and free resources, but this is a quick fix
 						 */
@@ -469,8 +503,16 @@ public class NotificationSenderService extends Service
 		sendBroadcast(i);
     }
 
-  
-  
+    void SendVibrationLevel(int id) {
+    	Intent i = new Intent();
+		Bundle b = new Bundle();
+		b.putInt(CosmosMsg.msg, CosmosMsg.VIBRATION_LEVEL_CHANGE);
+		b.putInt(CosmosMsg.value, id);
+		i.putExtras(b);
+		i.setAction(CosmosMsg.notifyAction);
+		sendBroadcast(i);
+    }
+
 }
 
 
