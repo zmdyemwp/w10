@@ -11,6 +11,7 @@ package com.goldtek;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.Formatter;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -33,7 +34,6 @@ import android.provider.CallLog.Calls;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import 	java.util.Formatter;
 import android.widget.Toast;
 
 public class NotificationSenderService extends Service
@@ -191,6 +191,8 @@ public class NotificationSenderService extends Service
 
 			        if(action == CosmosMsg.SET_CURRENT_TIME) {
 			        	Calendar c = Calendar.getInstance();
+			        	TimeZone tz = TimeZone.getTimeZone("UTC");
+			        	c.setTimeZone(tz);
 			        	Formatter f = new Formatter();
 			        	String s = f.format("SETTIME=%d,%d,%d,%d,%d,%d,",
 			        			c.get(Calendar.YEAR),
@@ -370,13 +372,16 @@ public class NotificationSenderService extends Service
 							int start = 0;
 							int end = 0;
 							start = strInput.indexOf(',');
-							start = strInput.subSequence(start+1, strInput.length())
-									.toString().indexOf(',');
+							start = strInput.indexOf(',', start+1);
 							end = strInput.indexOf('\r');
-							if(0 == Integer.valueOf(strInput.substring(start, end))) {
-								SendVibrationLevel(R.id.vOff);
-							} else {
-								SendVibrationLevel(R.id.vOn);
+							try {
+								if(0 == Integer.valueOf(strInput.substring(start+1, end))) {
+									SendVibrationLevel(R.id.vOff);
+								} else {
+									SendVibrationLevel(R.id.vOn);
+								}
+							} catch(Throwable e) {
+								Log.d("VLevel", e.getLocalizedMessage());
 							}
 						}
 						
