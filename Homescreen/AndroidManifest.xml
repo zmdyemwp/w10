@@ -90,6 +90,15 @@
             </intent-filter>
         </activity>
         
+        <activity
+            android:name="com.goldtek.NotificationListActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/accessibility_service">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        
         <service android:name="com.goldtek.GoldtekService"
             android:label="@string/accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

@@ -167,7 +167,8 @@ public class NewMainActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
-			Intent intent = new Intent(getApplicationContext(), CosMosActivity.class);
+			//Intent intent = new Intent(getApplicationContext(), CosMosActivity.class);
+			Intent intent = new Intent(getApplicationContext(), NotificationListActivity.class);
 			startActivity(intent);
 		}
 	};
