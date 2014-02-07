@@ -2,8 +2,10 @@ package com.goldtek;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
@@ -62,14 +64,9 @@ public class NotificationListActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l,v,position,id);
 		try {
-			SparseBooleanArray checkeds = l.getCheckedItemPositions();
-			if(checkeds.get(position)) {
-				//	TODO: enable notification
-				
-			} else {
-				//	TODO: disable notification
-				
-			}
+			SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+			editor.putBoolean(lsa.getItem(position), l.getCheckedItemPositions().get(position));
+			editor.commit();
 		} catch (Throwable e) {
 			Log.d("onListItemClick", e.getLocalizedMessage());
 		}
@@ -82,12 +79,21 @@ public class NotificationListActivity extends ListActivity {
 		return true;
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		for(int i = 0; i < lsa.getCount(); i++) {
+			getListView().setItemChecked(i, sp.getBoolean(lsa.getItem(i), false));
+		}
+	}
+
 	/**
 			"",									"SMS"
 			"",									"Calendar"
 			"com.facebook.katana",				"Facebook"
 			"com.twitter.android",				"Twitter"
-			"",									"Gmail"
+			"com.google.android.gm",			"Gmail"
 			"com.whatsapp",						"Whatsapp"
 			"jp.naver.line.android",			"Line"
 			"com.instagram.android",			"Instagram"

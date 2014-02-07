@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.util.SparseArray;
@@ -95,8 +96,13 @@ public class GoldtekService extends AccessibilityService {
     private static final String[] PACKAGE_NAMES = new String[] {
             //"com.android.alarmclock", "com.google.android.deskclock", "com.android.deskclock"
     	"com.facebook.katana","com.twitter.android","com.google.android.gm",
-    	"com.whatsapp","com.google.android.email","com.sec.android.email","com.htc.android.mail",
-    	"com.android.email","com.motorola.blur.email","jp.naver.line.android"
+    	"com.whatsapp","jp.naver.line.android","com.instagram.android",
+    	"com.pinterest","com.google.android.apps.plus","com.skype.raider",
+    	"com.renren.xiaonei.android","co.vine.android","com.tencent.mm",
+    	"com.linkedin.android",
+    	/*		others		*/
+    	"com.google.android.email","com.sec.android.email","com.htc.android.mail",
+    	"com.android.email","com.motorola.blur.email",
     };
 
     // Message types we are passing around.
@@ -613,6 +619,41 @@ public class GoldtekService extends AccessibilityService {
         	str = "MOTO-BLUR Email";
         	return str;
         }
+        /***********************************************************************************/
+        //"",									"SMS"
+		//"",									"Calendar"
+        if ((sender_package.equalsIgnoreCase("com.instagram.android"))){
+        	str = "Instagram";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("com.pinterest"))){
+        	str = "Pinterest";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("com.google.android.apps.plus"))){
+        	str = "Google+";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("com.skype.raider"))){
+        	str = "Skype";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("com.renren.xiaonei.android"))){
+        	str = "Renren";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("co.vine.android"))){
+        	str = "Vine";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("com.tencent.mm"))){
+        	str = "Wechat";
+        	return str;
+        }
+        if ((sender_package.equalsIgnoreCase("com.linkedin.android"))){
+        	str = "LinkedIn";
+        	return str;
+        }
 	  
         return str;
     }
@@ -687,16 +728,18 @@ public class GoldtekService extends AccessibilityService {
         	       }
                 break;
         }
-        
+
+
+        //	TODO: check if the notification is required!
         String sender = shortendSenserNameFromPackage(str1);
-        
-        Intent localIntent2 = new Intent(this, NotificationSenderService.class);
-        localIntent2.setAction("GOLDTEK_WATCH");
-        localIntent2.putExtra("sender", sender);
-        localIntent2.putExtra("message", str3);
-        startService(localIntent2);
-    	
-    	
+        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(sender, false)) {
+	        Intent localIntent2 = new Intent(this, NotificationSenderService.class);
+	        localIntent2.setAction("GOLDTEK_WATCH");
+	        localIntent2.putExtra("sender", sender);
+	        localIntent2.putExtra("message", str3);
+	        startService(localIntent2);
+        }
+
         //Log.i(LOG_TAG, mProvidedFeedbackType + " " + event.toString());
         /*
         // Here we act according to the feedback type we are currently providing.
