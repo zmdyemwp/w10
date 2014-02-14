@@ -26,6 +26,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +38,9 @@ import android.os.IBinder;
 import android.provider.CallLog.Calls;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -210,7 +218,8 @@ public class NotificationSenderService extends Service
 			        	String senderId = intent.getStringExtra("sender");
 			        	String messageBody = intent.getStringExtra("message");
 			        	Log.d(TAG,"< sender: " + senderId+" Message :"+messageBody+" >");			        	
-			        	writeTowatch( senderId, messageBody);
+			        	//writeTowatch( senderId, messageBody);
+			        	sendImage2Watch(senderId, messageBody);
 			        } else {
 			        	
 			        	//do nothing 
@@ -237,8 +246,109 @@ public class NotificationSenderService extends Service
 				}
 			}
 		}
+
+		
+	final String tag = "sendImage2Watch";
+	public void sendImage2Watch(String title, String content) {
+		if (null == mBTSocket || !mIsBluetoothConnected  ) {
+			return;
+		}
+
+		Log.d(tag, title+"::"+content);
+		final int w = 160;
+		final int h = 100;
+		Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(b);
+		Paint p = new Paint();
+		Rect rc = new Rect();
+		
+		c.drawColor(Color.WHITE);
+		float dy = 0;
+		//	Draw Title
+		p.getTextBounds(title, 0, title.length(), rc);
+		p.setTextAlign(Paint.Align.CENTER);
+		c.drawText(title, 80, 0-rc.top, p);
+		dy += rc.bottom - rc.top + 2;
+		c.drawLine(0, dy, 159, dy, p);
+		dy += 5;
+
+		//	Draw Content
+		/*p.getTextBounds(content, 0, content.length(), rc);
+		p.setTextAlign(Paint.Align.LEFT);
+		c.drawText(content, 0, dy-rc.top, p);*/
+		TextPaint tp = new TextPaint();
+		StaticLayout sl = new StaticLayout(content, tp, 100, Layout.Alignment.ALIGN_NORMAL, 1, 1, false);
+		c.save();
+		c.translate(0, dy);
+		sl.draw(c);
+		c.restore();
+
+
+		byte[] binary = new byte[w/8*h];
+		short v = 0;
+		int index = 0;
+		String s = "";
+
+		int[] pixels=new int[b.getWidth() * b.getHeight()];
+		b.getPixels(pixels, 0, b.getWidth(), 0, 0, b.getWidth(), b.getHeight());
+
+		theLoop:
+		for(int r = 0; r < h; r++) {
+			for(int i = 0; i < w; i++) {
+				try {
+					index = w/8*r + i/8;
+					if(Color.WHITE == pixels[index]) {
+						v *= 2;
+					} else {
+						v = (short)(2*v + 1);
+					}
+					if(0 == (1+i)%8) {
+						binary[index] = (byte)(v & 0xFF);
+						s += String.format("0x%02x, ", v);
+						v = 0;
+					} else {
+					}
+				} catch(Throwable e) {
+					Log.d("ERROR", "index: "+index);
+					break theLoop;
+				}
+			}
+			s += "\n";
+		}
+
+		//	SPP command
+		//		SPP+PICTURE=<X>,<Y>,<Width>,<Height>,<Data>\r\0
+		final String cmd = "SPP+PICTURE=0,0,"+w+","+h+",";
+		try {
+			//byte[] x = new byte[32];
+			int dp = 0;
+			byte[] data = new byte[cmd.length()+w/8*h+2];
+			System.arraycopy(cmd.getBytes(), 0, data, dp, cmd.length());
+			dp += cmd.length();
+			System.arraycopy(binary, 0, data, dp, w/8*h);
+			dp += w/8*h;
+			System.arraycopy("\r\0".getBytes(), 0, data, dp, 2);
+			dp += 2;
+			mBTSocket.getOutputStream().write(data, 0, dp);
+			
+			//String rest = ","+content.length()+","+content;
+			//final String test = "SPP+NOTIFY="+title+rest+"\r\0";
+			//mBTSocket.getOutputStream().write(test.getBytes());
+			//mBTSocket.getOutputStream().write(title.getBytes());
+			//mBTSocket.getOutputStream().write(test.getBytes());
+			//mBTSocket.getOutputStream().write("\r\0".getBytes());
+			
+			//String str ="SPP+NOTIFY="+title+","+content.length()+","+content+"\r\0";
+			//mBTSocket.getOutputStream().write(str.getBytes());
+			
+		} catch(Throwable e) {
+			Log.d("sendImage2Watch", e.getLocalizedMessage());
+		}
+
+	}
 	
-	
+		
+		
    public void writeTowatch( String sender, String msg){
 		
 	   if (mBTSocket !=null && mIsBluetoothConnected  ) {
@@ -290,7 +400,8 @@ public class NotificationSenderService extends Service
 	            // phone ringing
 	            Log.i(TAG, "RINGING, number: " + incomingNumber);
 	            
-	            writeTowatch( "Call-in",incomingNumber );
+	            //writeTowatch( "Call-in",incomingNumber );
+	            sendImage2Watch("Call-in",incomingNumber);
 	        }
 
 	        if (TelephonyManager.CALL_STATE_OFFHOOK == state) {

@@ -95,7 +95,7 @@ public class GoldtekService extends AccessibilityService {
     // This works with AlarmClock and Clock whose package name changes in different releases
     private static final String[] PACKAGE_NAMES = new String[] {
             //"com.android.alarmclock", "com.google.android.deskclock", "com.android.deskclock"
-    	"com.facebook.katana","com.twitter.android","com.google.android.gm",
+    	"facebook.orca","com.facebook.katana","com.twitter.android","com.google.android.gm",
     	"com.whatsapp","jp.naver.line.android","com.instagram.android",
     	"com.pinterest","com.google.android.apps.plus","com.skype.raider",
     	"com.renren.xiaonei.android","co.vine.android","com.tencent.mm",
@@ -574,7 +574,8 @@ public class GoldtekService extends AccessibilityService {
     	
     	String str = sender_package;
     	
-    	if ((sender_package.equalsIgnoreCase("com.facebook.katana"))){
+    	if ((sender_package.equalsIgnoreCase("com.facebook.katana")) &&
+    			(sender_package.equalsIgnoreCase("com.facebook.orca"))){
    		 str = "Facebook";
    		 return str;
    	    }
@@ -664,6 +665,7 @@ public class GoldtekService extends AccessibilityService {
     	//Toast.makeText(this, "[GOLDTEK]Got event from " + event.getPackageName(), Toast.LENGTH_SHORT)
        // .show();
     	Log.v(LOG_TAG,"=======HELLO welcome ========");
+    	Log.d("onAccessibilityEvent", "XXXXXXX");
     	
     	//Log.v(LOG_TAG, String.format(
          //       "JMD onAccessibilityEvent: [type] %s [class] %s [package] %s [time] %s [text] %s",
@@ -738,6 +740,8 @@ public class GoldtekService extends AccessibilityService {
 	        localIntent2.putExtra("sender", sender);
 	        localIntent2.putExtra("message", str3);
 	        startService(localIntent2);
+        } else {
+			Log.d("onAccessibilityEvent", "This is NOT enabled");
         }
 
         //Log.i(LOG_TAG, mProvidedFeedbackType + " " + event.toString());
