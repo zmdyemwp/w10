@@ -8,8 +8,10 @@
 
 package com.goldtek;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.TimeZone;
@@ -31,6 +33,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -162,10 +165,11 @@ public class NotificationSenderService extends Service
 			        if(action == "DISCONNECT_TO_BT"){
 			        	Bundle b = intent.getExtras();
 			        	mDevice = b.getParcelable("mybtdevice");			    					    		
-			    		mDeviceUUID = UUID.fromString(b.getString("mybtuuid"));			    		
+			    		//mDeviceUUID = UUID.fromString(b.getString("mybtuuid"));
+			        	mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 			    		mMaxChars = b.getInt("mybuffersize");
 			    		mIsUserInitiatedDisconnect = b.getBoolean("userDisconnect");
-			    		
+			    		Log.d("DisConnectBT", "disconnect");
 			    		new DisConnectBT().execute();			    			
 			        }
 			        
@@ -217,9 +221,9 @@ public class NotificationSenderService extends Service
 			        if(action == "GOLDTEK_WATCH") {
 			        	String senderId = intent.getStringExtra("sender");
 			        	String messageBody = intent.getStringExtra("message");
-			        	Log.d(TAG,"< sender: " + senderId+" Message :"+messageBody+" >");			        	
+			        	Log.d(tag,"< sender: " + senderId+" Message :"+messageBody+" >");			        	
 			        	//writeTowatch( senderId, messageBody);
-			        	sendImage2Watch(senderId, messageBody);
+			        	sendImage2Watch(160, 100, senderId, messageBody);
 			        } else {
 			        	
 			        	//do nothing 
@@ -249,100 +253,78 @@ public class NotificationSenderService extends Service
 
 		
 	final String tag = "sendImage2Watch";
-	public void sendImage2Watch(String title, String content) {
+	public void sendImage2Watch(int width, int height, String title, String content) {
 		if (null == mBTSocket || !mIsBluetoothConnected  ) {
 			return;
 		}
 
 		Log.d(tag, title+"::"+content);
-		final int w = 160;
-		final int h = 100;
+		final int w = width;
+		final int h = height;
 		Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 		Canvas c = new Canvas(b);
 		Paint p = new Paint();
 		Rect rc = new Rect();
 		
 		c.drawColor(Color.WHITE);
-		float dy = 0;
+		Paint bkPaint = new Paint();
+		bkPaint.setStyle(Paint.Style.STROKE);
+		c.drawRect(0, 0, w-1, h-1, bkPaint);
+		float dy = 3;
 		//	Draw Title
-		p.getTextBounds(title, 0, title.length(), rc);
+		p.setTextSize(14);
+		p.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
 		p.setTextAlign(Paint.Align.CENTER);
-		c.drawText(title, 80, 0-rc.top, p);
+		p.getTextBounds(title, 0, title.length(), rc);
+		c.drawText(title, w/2, dy-rc.top, p);
 		dy += rc.bottom - rc.top + 2;
-		c.drawLine(0, dy, 159, dy, p);
+		c.drawLine(0, dy, w, dy, p);
 		dy += 5;
-
 		//	Draw Content
-		/*p.getTextBounds(content, 0, content.length(), rc);
-		p.setTextAlign(Paint.Align.LEFT);
-		c.drawText(content, 0, dy-rc.top, p);*/
 		TextPaint tp = new TextPaint();
-		StaticLayout sl = new StaticLayout(content, tp, 100, Layout.Alignment.ALIGN_NORMAL, 1, 1, false);
+		tp.setTextSize(14);
+		StaticLayout sl = new StaticLayout(content, tp, h, Layout.Alignment.ALIGN_NORMAL, 1, 1, false);
 		c.save();
-		c.translate(0, dy);
+		c.translate(2, dy);
 		sl.draw(c);
 		c.restore();
-
+		//	get pixels
+		int[] pixels=new int[w * h];
+		b.getPixels(pixels, 0, w, 0, 0, w, h);
 
 		byte[] binary = new byte[w/8*h];
-		short v = 0;
-		int index = 0;
-		String s = "";
-
-		int[] pixels=new int[b.getWidth() * b.getHeight()];
-		b.getPixels(pixels, 0, b.getWidth(), 0, 0, b.getWidth(), b.getHeight());
-
 		theLoop:
 		for(int r = 0; r < h; r++) {
-			for(int i = 0; i < w; i++) {
+			for(int i = 0; i < w; i+=8) {
 				try {
-					index = w/8*r + i/8;
-					if(Color.WHITE == pixels[index]) {
-						v *= 2;
-					} else {
-						v = (short)(2*v + 1);
-					}
-					if(0 == (1+i)%8) {
-						binary[index] = (byte)(v & 0xFF);
-						s += String.format("0x%02x, ", v);
-						v = 0;
-					} else {
-					}
+					binary[w/8*r + i/8] =
+							(byte) (
+								((Color.WHITE == pixels[w*r + i + 0])? 0:128) +
+								((Color.WHITE == pixels[w*r + i + 1])? 0:64) +
+								((Color.WHITE == pixels[w*r + i + 2])? 0:32) +
+								((Color.WHITE == pixels[w*r + i + 3])? 0:16) +
+								((Color.WHITE == pixels[w*r + i + 4])? 0:8) +
+								((Color.WHITE == pixels[w*r + i + 5])? 0:4) +
+								((Color.WHITE == pixels[w*r + i + 6])? 0:2) +
+								((Color.WHITE == pixels[w*r + i + 7])? 0:1)
+							);
 				} catch(Throwable e) {
-					Log.d("ERROR", "index: "+index);
+					Log.d("ERROR", e.getLocalizedMessage());
+					Log.d("ERROR", String.format("(%d, %d)", r, i));
 					break theLoop;
 				}
 			}
-			s += "\n";
 		}
 
 		//	SPP command
 		//		SPP+PICTURE=<X>,<Y>,<Width>,<Height>,<Data>\r\0
-		final String cmd = "SPP+PICTURE=0,0,"+w+","+h+",";
+		final String cmd = String.format("SPP+PICTURE=%d,%d,%d,%d,", (160-w)/2, (100-h)/2, w, h);
 		try {
-			//byte[] x = new byte[32];
-			int dp = 0;
-			byte[] data = new byte[cmd.length()+w/8*h+2];
-			System.arraycopy(cmd.getBytes(), 0, data, dp, cmd.length());
-			dp += cmd.length();
-			System.arraycopy(binary, 0, data, dp, w/8*h);
-			dp += w/8*h;
-			System.arraycopy("\r\0".getBytes(), 0, data, dp, 2);
-			dp += 2;
-			mBTSocket.getOutputStream().write(data, 0, dp);
-			
-			//String rest = ","+content.length()+","+content;
-			//final String test = "SPP+NOTIFY="+title+rest+"\r\0";
-			//mBTSocket.getOutputStream().write(test.getBytes());
-			//mBTSocket.getOutputStream().write(title.getBytes());
-			//mBTSocket.getOutputStream().write(test.getBytes());
-			//mBTSocket.getOutputStream().write("\r\0".getBytes());
-			
-			//String str ="SPP+NOTIFY="+title+","+content.length()+","+content+"\r\0";
-			//mBTSocket.getOutputStream().write(str.getBytes());
-			
+			mBTSocket.getOutputStream().write(cmd.getBytes());
+			mBTSocket.getOutputStream().write(binary);
+			mBTSocket.getOutputStream().write("\r\0".getBytes());
 		} catch(Throwable e) {
-			Log.d("sendImage2Watch", e.getLocalizedMessage());
+			Log.d(tag, e.getLocalizedMessage());
 		}
 
 	}
@@ -382,6 +364,7 @@ public class NotificationSenderService extends Service
       //unbindService(this.mConnection);
     	if (mBTSocket != null && mIsBluetoothConnected) {
 			new DisConnectBT().execute();
+			
 		}
     	
       this.mBound = false;
@@ -401,7 +384,7 @@ public class NotificationSenderService extends Service
 	            Log.i(TAG, "RINGING, number: " + incomingNumber);
 	            
 	            //writeTowatch( "Call-in",incomingNumber );
-	            sendImage2Watch("Call-in",incomingNumber);
+	            sendImage2Watch(120, 80, "Call-in",incomingNumber);
 	        }
 
 	        if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
@@ -526,6 +509,8 @@ public class NotificationSenderService extends Service
 //							});
 //						}
 
+					} else {
+						Log.d("DisConnectBT", "zzzzzzzzzzzzzzzzzzzzzzzzzz");
 					}
 					Thread.sleep(500);
 				}
@@ -553,21 +538,32 @@ public class NotificationSenderService extends Service
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			
+			Log.d("DisConnectBT", "doInBackground");
 
 			if (mReadThread != null) {
 				mReadThread.stop();
-				while (mReadThread.isRunning())
+				try {
+					mBTSocket.getOutputStream().write("SPP+STOP=\r\0".getBytes());
+				} catch (Throwable e) {
+					Log.d("DisConnectBT", e.getLocalizedMessage());
+				}
+				while (mReadThread.isRunning()) {
 					; // Wait until it stops
+				}
+				Log.d("DisConnectBT", "xxxxxxxxxxxxxxxxxxx");
 				mReadThread = null;
-
+				Log.d("DisConnectBT", "Terminate ReadThread");
 			}
 
 			try {
 				if(null != mBTSocket) {
 					mBTSocket.close();
+					Log.d("DisConnectBT", "BT socket closed!");
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
+				Log.d("DisConnectBT", e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 
@@ -577,6 +573,7 @@ public class NotificationSenderService extends Service
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
+			Log.d("DisConnectBT", "onPostExecute");
 			mIsBluetoothConnected = false;
 			if (mIsUserInitiatedDisconnect) {
 				//finish(); TODO
