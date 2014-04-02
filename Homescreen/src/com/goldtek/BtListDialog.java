@@ -21,16 +21,19 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.goldtek.NewMainActivity;
+
 public class BtListDialog extends DialogFragment {
 	
-	static BluetoothDevice currentDev = null;
+	public static BluetoothDevice currentDev = null;
 	static private int mMaxChars = 50000;//Default
 	static private UUID mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private LayoutInflater mInflater;
 	private BluetoothAdapter mBTAdapter;
 	//private static final int BT_ENABLE_REQUEST = 10; // This is the code we use for BT Enable
 	ArrayList<BluetoothDevice> list;
-
+	boolean bSelectOne = false;
+	
 	class BtDevAdapter extends ArrayAdapter<BluetoothDevice> {
 		private int mResource;
 		ArrayList<BluetoothDevice> mobjs;
@@ -40,9 +43,10 @@ public class BtListDialog extends DialogFragment {
 			mResource = resource;
 			mobjs = objects;
 		}
-		
+
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			bSelectOne = false;
 			return createViewFromResource(position, convertView, parent, mResource);
 		}
 		
@@ -103,8 +107,17 @@ public class BtListDialog extends DialogFragment {
 			Log.d("Selected Bluetooth Device",
 					list.get(which).getName()+"<"+list.get(which).getAddress()+">");
 			connect2Dev(list.get(which));
+			bSelectOne = true;
 		}
 	};
+	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		if( !bSelectOne ) {
+			((NewMainActivity)(this.getActivity())).doGetConnectionStatus();
+		}
+	}
 	
 	@Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

@@ -1,16 +1,25 @@
 package com.goldtek;
 
+import java.util.List;
+
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -85,6 +94,85 @@ public class NewMainActivity extends Activity {
 		
 		this.doGetConnectionStatus();
 		this.doGetVibrationLevel();
+		
+		if( checkBTPower() ) {
+			checkAccessibility();
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		//	TODO: check BT on/off
+		//checkBTPower();
+	}
+
+	BluetoothAdapter mba = null;
+	boolean checkBTPower() {
+		if(null == mba) {
+			mba = BluetoothAdapter.getDefaultAdapter();
+		}
+		if(null != mba && !this.mba.isEnabled()) {
+			AlertDialog.Builder localBuilder = new AlertDialog.Builder(this);
+			localBuilder.setTitle("Watch connection")
+						.setMessage("Please turn on bluetooth and pair your watch.")
+						.setCancelable(true)
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+								Intent localIntent = new Intent("android.intent.action.MAIN", null);
+								localIntent.addCategory("android.intent.category.LAUNCHER");
+								localIntent.setComponent(new ComponentName("com.android.settings", "com.android.settings.bluetooth.BluetoothSettings"));
+								localIntent.setFlags(268435456);
+								startActivity(localIntent);
+							}
+						})
+						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+								paramDialogInterface.cancel();
+							}
+						});
+	        localBuilder.create().show();
+	        return false;
+		}
+		return true;
+	}
+
+	boolean checkAccessibility() {
+		AccessibilityManager am = (AccessibilityManager)getSystemService(Context.ACCESSIBILITY_SERVICE);
+		List<AccessibilityServiceInfo> list =
+				am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
+		Log.d("AccessibilityTest", "Count of List: "+list.size());
+		boolean isEnabled = false;
+		loop:
+		for(AccessibilityServiceInfo i:list) {
+			if("com.goldtek/.GoldtekService".equalsIgnoreCase(i.getId())) {
+				isEnabled = true;
+				break loop;
+			}
+		}
+		if( !isEnabled ) {
+			Log.d("AccessibilityTest", "Popup Dialog");
+			AlertDialog.Builder localBuilder = new AlertDialog.Builder(this);
+			localBuilder.setTitle("Notification Service")
+						.setMessage("Please enable this service to pass notification to watch.")
+						.setCancelable(true)
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+								Intent i = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+								startActivity(i);
+							}
+						})
+						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+								paramDialogInterface.cancel();
+							}
+						});
+	        localBuilder.create().show();
+		} else {
+			Log.d("AccessibilityTest", "Service is Enabled!");
+		}
+		Log.d("AccessibilityTest", "End of Process");
+		return isEnabled;
 	}
 
 	public void onDestroy() {
@@ -95,7 +183,6 @@ public class NewMainActivity extends Activity {
 		}
 		super.onDestroy();
 	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -118,20 +205,22 @@ public class NewMainActivity extends Activity {
 
 
 	View.OnClickListener doConnect = new View.OnClickListener() {
-		
 		@Override
 		public void onClick(View v) {
-			tvConnection.setText(R.string.connecting);
-			//	TODO: Show the paired BT devices
-			android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	        android.app.Fragment prev = getFragmentManager().findFragmentByTag("btlistdialog");
-	        if (prev != null) {
-	            ft.remove(prev);
-	        }
-	        ft.addToBackStack(null);
-
-			BtListDialog btlist = new BtListDialog();
-			btlist.show(ft, "btlistdialog");
+			
+			if( checkBTPower() ) {
+				tvConnection.setText(R.string.connecting);
+				//	TODO: Show the paired BT devices
+				android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+		        android.app.Fragment prev = getFragmentManager().findFragmentByTag("btlistdialog");
+		        if (prev != null) {
+		            ft.remove(prev);
+		        }
+		        ft.addToBackStack(null);
+	
+				BtListDialog btlist = new BtListDialog();
+				btlist.show(ft, "btlistdialog");
+			}
 		}
 	};
 	
@@ -168,8 +257,10 @@ public class NewMainActivity extends Activity {
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
 			//Intent intent = new Intent(getApplicationContext(), CosMosActivity.class);
-			Intent intent = new Intent(getApplicationContext(), NotificationListActivity.class);
-			startActivity(intent);
+			if(checkAccessibility()) {
+				Intent intent = new Intent(getApplicationContext(), NotificationListActivity.class);
+				startActivity(intent);
+			}
 		}
 	};
 
@@ -180,7 +271,7 @@ public class NewMainActivity extends Activity {
 		startService(intent);
 	}
 
-	void doGetConnectionStatus() {
+	public void doGetConnectionStatus() {
 		Intent intent = new Intent(this, NotificationSenderService.class);
 		intent.setAction(CosmosMsg.GET_CONNECTION_STATUS);
 		startService(intent);

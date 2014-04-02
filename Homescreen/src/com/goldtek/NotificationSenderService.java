@@ -8,10 +8,8 @@
 
 package com.goldtek;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.TimeZone;
@@ -34,11 +32,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.CallLog.Calls;
+import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.Layout;
@@ -140,10 +140,12 @@ public class NotificationSenderService extends Service
 			// stopped, so return sticky.
 				if(intent != null) {	 
 			        String action = intent.getAction();  
-			        if(action == "android.provider.Telephony.SMS_RECEIVED") {
+			        //if(action == "android.provider.Telephony.SMS_RECEIVED") {
+			        if(action == "SMS_RECEIVED") {
 			        	String smsreceived = intent.getStringExtra("sms");
 			        	Log.d(TAG,"SMS:" + smsreceived);
-			        	writeTowatch( "SMS", smsreceived);
+			        	//writeTowatch( "SMS", smsreceived);
+			        	sendImage2Watch(160, 100, "SMS", smsreceived);
 			        }
 
 			        if(action == "CONNECT_TO_BT"){
@@ -269,10 +271,10 @@ public class NotificationSenderService extends Service
 		c.drawColor(Color.WHITE);
 		Paint bkPaint = new Paint();
 		bkPaint.setStyle(Paint.Style.STROKE);
-		c.drawRect(0, 0, w-1, h-1, bkPaint);
+		c.drawRect(0, 1, w-2, h-2, bkPaint);
 		float dy = 3;
 		//	Draw Title
-		p.setTextSize(14);
+		p.setTextSize(20);
 		p.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
 		p.setTextAlign(Paint.Align.CENTER);
 		p.getTextBounds(title, 0, title.length(), rc);
@@ -281,11 +283,13 @@ public class NotificationSenderService extends Service
 		c.drawLine(0, dy, w, dy, p);
 		dy += 5;
 		//	Draw Content
+		final int margin = 5;
 		TextPaint tp = new TextPaint();
-		tp.setTextSize(14);
-		StaticLayout sl = new StaticLayout(content, tp, h, Layout.Alignment.ALIGN_NORMAL, 1, 1, false);
+		tp.setTextSize(20);
+		//tp.setFakeBoldText(true);
+		StaticLayout sl = new StaticLayout(content, tp, w-2*margin, Layout.Alignment.ALIGN_NORMAL, 1, 1, false);
 		c.save();
-		c.translate(2, dy);
+		c.translate(margin, dy);
 		sl.draw(c);
 		c.restore();
 		//	get pixels
@@ -375,16 +379,30 @@ public class NotificationSenderService extends Service
   private class PhoneCallListener extends PhoneStateListener {
 
 	    private boolean isPhoneCalling = false;
-
+	    private static final int DISPLAY_NAME_COLUMN_INDEX = 0;
 	    @Override
 	    public void onCallStateChanged(int state, String incomingNumber) {
 
 	        if (TelephonyManager.CALL_STATE_RINGING == state) {
+	        	String result="";
+	        	try {
+					Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
+					Cursor cursor = getContentResolver()
+							.query(uri, new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
+					if (!cursor.moveToFirst()) {
+						result = "";
+					} else {
+						result = cursor.getString(DISPLAY_NAME_COLUMN_INDEX);
+					}
+				} catch(Throwable e) {
+					Log.d("", e.getLocalizedMessage());
+				}
+	        	incomingNumber = incomingNumber+"\n"+result;
 	            // phone ringing
 	            Log.i(TAG, "RINGING, number: " + incomingNumber);
 	            
 	            //writeTowatch( "Call-in",incomingNumber );
-	            sendImage2Watch(120, 80, "Call-in",incomingNumber);
+	            sendImage2Watch(160, 100, "Call-in",incomingNumber);
 	        }
 
 	        if (TelephonyManager.CALL_STATE_OFFHOOK == state) {

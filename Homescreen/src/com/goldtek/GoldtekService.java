@@ -93,9 +93,11 @@ public class GoldtekService extends AccessibilityService {
      * </p>
      */
     // This works with AlarmClock and Clock whose package name changes in different releases
+    //	TODO:
     private static final String[] PACKAGE_NAMES = new String[] {
             //"com.android.alarmclock", "com.google.android.deskclock", "com.android.deskclock"
-    	"facebook.orca","com.facebook.katana","com.twitter.android","com.google.android.gm",
+    	"com.google.android.talk",		//	google Hangouts
+    	"com.facebook.orca","com.facebook.katana","com.twitter.android","com.google.android.gm",
     	"com.whatsapp","jp.naver.line.android","com.instagram.android",
     	"com.pinterest","com.google.android.apps.plus","com.skype.raider",
     	"com.renren.xiaonei.android","co.vine.android","com.tencent.mm",
@@ -574,7 +576,11 @@ public class GoldtekService extends AccessibilityService {
     	
     	String str = sender_package;
     	
-    	if ((sender_package.equalsIgnoreCase("com.facebook.katana")) &&
+    	if ((sender_package.equalsIgnoreCase("com.google.android.talk"))){
+   		 str = "Hangouts";
+   		 return str;
+   	    }
+    	if ((sender_package.equalsIgnoreCase("com.facebook.katana")) ||
     			(sender_package.equalsIgnoreCase("com.facebook.orca"))){
    		 str = "Facebook";
    		 return str;
@@ -665,7 +671,6 @@ public class GoldtekService extends AccessibilityService {
     	//Toast.makeText(this, "[GOLDTEK]Got event from " + event.getPackageName(), Toast.LENGTH_SHORT)
        // .show();
     	Log.v(LOG_TAG,"=======HELLO welcome ========");
-    	Log.d("onAccessibilityEvent", "XXXXXXX");
     	
     	//Log.v(LOG_TAG, String.format(
          //       "JMD onAccessibilityEvent: [type] %s [class] %s [package] %s [time] %s [text] %s",
@@ -685,56 +690,47 @@ public class GoldtekService extends AccessibilityService {
     	
         switch (eventType) {
 
+        //	TODO:
         case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
+        	//MainActivity.forwardSMStowatch(getEventText(event));
+        	str1 = event.getPackageName().toString();
+        	str2 = event.getText().toString();
+        	Log.d("NOTIFY", str1);
+        	Log.v(LOG_TAG,String.format("=======Message str2: (%s)", str2));
+        	str3 = str2.substring(1, -1 + str2.length());
+        	Log.v(LOG_TAG,"=======Message str3: "+str3);
+			/*
+			if (str1.equalsIgnoreCase("jp.naver.line.android")) {
+				Log.v(LOG_TAG,"=======jp.naver.line.android=========");
+				String str4 = str3;// + getExtraData((Notification)localParcelable, str3, str1);
+				str3 = str4.substring(6, str4.length());
+				str1 = "LINE";
+			} */ 
+			if ((str1.equalsIgnoreCase("com.whatsapp")) 
+				|| (str1.equalsIgnoreCase("com.google.android.gm")) 
+				|| (str1.equalsIgnoreCase("com.google.android.email")) 
+				|| (str1.equalsIgnoreCase("com.sec.android.email")) 
+				|| (str1.equalsIgnoreCase("com.htc.android.mail")) 
+				|| (str1.equalsIgnoreCase("com.android.email")) 
+				|| (str1.equalsIgnoreCase("com.motorola.blur.email"))) {
+				if (Build.VERSION.SDK_INT >= 16) {
+				Log.v(LOG_TAG,"=======> SDK=16 whatsapp, gm , gmail. htc.sec, =========");
+					//str3 = str3 + getExtraBigData((Notification)localParcelable, str3, str1);
+				} else {
+					//str3 = str3 + getExtraData((Notification)localParcelable, str3, str1);
+					Log.v(LOG_TAG,"=======> SDK<16 whatsapp, gm , gmail. htc.sec, =========");
+				}        	    	  
+			}
+			break;
         	
-        	
-        	   //MainActivity.forwardSMStowatch(getEventText(event));
-        		  str1 = event.getPackageName().toString();
-        		  str2 = event.getText().toString(); 
-        		  
-        		  
-        		  Log.v(LOG_TAG,"=======Message str2: %s "+str2);
-        		  
-        	      str3 = str2.substring(1, -1 + str2.length());
-        	      
-        	      Log.v(LOG_TAG,"=======Message str3: %s "+str3);
-        	      
-        	      
-        	      
-        	      if (str1.equalsIgnoreCase("jp.naver.line.android"))
-        	      {
-        	    	  Log.v(LOG_TAG,"=======jp.naver.line.android=========");
-        	        String str4 = str3;// + getExtraData((Notification)localParcelable, str3, str1);
-        	        str3 = str4.substring(6, str4.length());
-        	    	  str1 = "LINE";
-        	    	  
-        	      }  
-
-        	      if ((str1.equalsIgnoreCase("com.whatsapp")) 
-        	    		  || (str1.equalsIgnoreCase("com.google.android.gm")) 
-        	    		  || (str1.equalsIgnoreCase("com.google.android.email")) 
-        	    		  || (str1.equalsIgnoreCase("com.sec.android.email")) 
-        	    		  || (str1.equalsIgnoreCase("com.htc.android.mail")) 
-        	    		  || (str1.equalsIgnoreCase("com.android.email")) 
-        	    		  || (str1.equalsIgnoreCase("com.motorola.blur.email"))) {
-        	    	  
-        	    	  
-        	    	  
-        	    	  if (Build.VERSION.SDK_INT >= 16) {
-        	    		  Log.v(LOG_TAG,"=======> SDK=16 whatsapp, gm , gmail. htc.sec, =========");
-        	    		  //str3 = str3 + getExtraBigData((Notification)localParcelable, str3, str1);
-        	          } else {
-        	        	  //str3 = str3 + getExtraData((Notification)localParcelable, str3, str1);
-        	        	  Log.v(LOG_TAG,"=======> SDK<16 whatsapp, gm , gmail. htc.sec, =========");
-        	          }        	    	  
-        	       }
-                break;
+    	default:
+    		Log.d("NOTIFY", ""+eventType);
+    		break;
         }
-
-
-        //	TODO: check if the notification is required!
+        //	check if the notification is required!
         String sender = shortendSenserNameFromPackage(str1);
         if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(sender, false)) {
+        	Log.d("NOTIFY", sender +"::"+ str3);
 	        Intent localIntent2 = new Intent(this, NotificationSenderService.class);
 	        localIntent2.setAction("GOLDTEK_WATCH");
 	        localIntent2.putExtra("sender", sender);

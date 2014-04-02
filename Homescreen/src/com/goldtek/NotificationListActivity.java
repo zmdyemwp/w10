@@ -89,8 +89,8 @@ public class NotificationListActivity extends ListActivity {
 	}
 
 	/**
-			"",									"SMS"
-			"",									"Calendar"
+			//"",									"SMS"
+			//"",									"Calendar"
 			"com.facebook.katana",				"Facebook"
 			"com.twitter.android",				"Twitter"
 			"com.google.android.gm",			"Gmail"
@@ -106,8 +106,8 @@ public class NotificationListActivity extends ListActivity {
 			"com.linkedin.android",				"LinkedIn"
 	 * */
 	private final notiApp[] nApps = new notiApp[] {
-			new notiApp("", "SMS"),
-			new notiApp("", "Calendar"),
+			//new notiApp("", "SMS"),
+			//new notiApp("", "Calendar"),
 			new notiApp("com.facebook.katana", "Facebook"),
 			new notiApp("com.twitter.android", "Twitter"),
 			new notiApp("", "Gmail"),

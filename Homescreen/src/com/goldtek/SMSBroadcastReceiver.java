@@ -43,9 +43,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-        	
              Log.i(TAG, "JMD >>>>>>>>>>>>>>>Intent recieved: " + intent.getAction());
-
                 //if (intent.getAction() == SMS_RECEIVED) {
                   if(intent.getAction().equals(SMS_RECEIVED)) {
                     Bundle bundle = intent.getExtras();
