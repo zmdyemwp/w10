@@ -22,9 +22,9 @@
     <string name="template_screen_off">screen off</string>
     <string name="template_screen_on">screen on</string>
     <string name="accessibility_service">Accessibility/Accessibility Service</string>
-    <string name="accessibility_service_label">GWatch </string>
+    <string name="accessibility_service_label">Ranger W-Link </string>
     <string name="accessibility_service_instructions"><b><i>
-        \n\n        Enable GWatch (Settings -> Accessibility -> GWatch).
+        \n\n        Enable Ranger W-Link (Settings -> Accessibility -> GWatch).
         \n\n        To get Notification from your social Network and Email
         \n\n               
         \n\n                    facebook twitter Whatsapp Line.

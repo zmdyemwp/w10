@@ -14,7 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +28,9 @@ public class NewMainActivity extends Activity {
 
 	TextView	tvConnection;
 	RadioGroup	rgVibration;
-	  
+	 
+	//boolean preDisconnected = false;
+	
 	public BroadcastReceiver bcReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -209,6 +211,7 @@ public class NewMainActivity extends Activity {
 		public void onClick(View v) {
 			
 			if( checkBTPower() ) {
+				//BtListDialog.disconnectFromDev(v.getContext());
 				tvConnection.setText(R.string.connecting);
 				//	TODO: Show the paired BT devices
 				android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();

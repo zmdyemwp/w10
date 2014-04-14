@@ -158,10 +158,10 @@ public class NotificationSenderService extends Service
 			    		Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :4" );
 			    		mMaxChars = b.getInt("mybuffersize");
 			    		//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :5" );			    		
-			    		if (mBTSocket == null || !mIsBluetoothConnected) {
+			    		//if (mBTSocket == null || !mIsBluetoothConnected) {
 			    			//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>>6:" );
 			    			new ConnectBT().execute();
-			    		}   	
+			    		//}   	
 			        }
 
 			        if(action == "DISCONNECT_TO_BT"){
@@ -616,16 +616,29 @@ public class NotificationSenderService extends Service
 
 		@Override
 		protected Void doInBackground(Void... devices) {
-
 			try {
-				if (mBTSocket == null || !mIsBluetoothConnected) {
-					//mBTSocket = mDevice.createInsecureRfcommSocketToServiceRecord(mDeviceUUID);
-					mBTSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-					BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-					mBTSocket.connect();
+				if (mReadThread != null) {
+					mReadThread.stop();
+					try {
+						mBTSocket.getOutputStream().write("SPP+STOP=\r\0".getBytes());
+					} catch (Throwable e) {
+						Log.d("DisConnectBT", e.getLocalizedMessage());
+					}
+					while (mReadThread.isRunning()) {
+						Log.d("preDisconnect", "mReadThread.isRunning()"); // Wait until it stops
+					}
+					mReadThread = null;
 				}
+				if(null != mBTSocket) {
+					mBTSocket.close();
+				}
+				//mBTSocket = mDevice.createInsecureRfcommSocketToServiceRecord(mDeviceUUID);
+				mBTSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+				BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+				mBTSocket.connect();
 			} catch (IOException e) {
 				// Unable to connect to device
+				Log.d("Predisconnected", e.getLocalizedMessage());
 				e.printStackTrace();
 				mConnectSuccessful = false;
 			}
