@@ -20,6 +20,7 @@
 
 package com.goldtek;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,12 +28,6 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.Toast;
-import android.app.Service;
-
-
-
-import android.content.IntentFilter;
 
 
 
@@ -65,7 +60,17 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                             
                         }
                     }
+                } else if(intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)){
+                	Log.i(TAG, "JMD >>>>>>>>>>>>>>>Intent recieved: BT DISCONnECT ");
+                	Intent i = new Intent();
+            		Bundle b = new Bundle();
+            		b.putInt(CosmosMsg.msg, CosmosMsg.CONNECTION_STATUS_CHANGE);
+            		b.putInt(CosmosMsg.value, 0);
+            		i.putExtras(b);
+            		i.setAction(CosmosMsg.notifyAction);
+            		context.sendBroadcast(i);
                 }
+
                   
                   
                   
