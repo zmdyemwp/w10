@@ -44,7 +44,6 @@ import android.telephony.TelephonyManager;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 import android.widget.Toast;
 
 public class NotificationSenderService extends Service
@@ -135,7 +134,7 @@ public class NotificationSenderService extends Service
 	
 	@Override
 	 public int onStartCommand(Intent intent, int flags, int startId) {
-			Log.d(TAG, " onStartCommand  start id =" + startId + ": " + intent);
+			//Log.d(TAG, " onStartCommand  start id =" + startId + ": " + intent);
 			// We want this service to continue running until it is explicitly        
 			// stopped, so return sticky.
 				if(intent != null) {	 
@@ -143,7 +142,7 @@ public class NotificationSenderService extends Service
 			        //if(action == "android.provider.Telephony.SMS_RECEIVED") {
 			        if(action == "SMS_RECEIVED") {
 			        	String smsreceived = intent.getStringExtra("sms");
-			        	Log.d(TAG,"SMS:" + smsreceived);
+			        	//Log.d(TAG,"SMS:" + smsreceived);
 			        	//writeTowatch( "SMS", smsreceived);
 			        	sendImage2Watch(160, 100, "SMS", smsreceived);
 			        }
@@ -155,7 +154,7 @@ public class NotificationSenderService extends Service
 			    		mDevice = b.getParcelable("mybtdevice");
 			    		//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> 3:" );			    		
 			    		mDeviceUUID = UUID.fromString(b.getString("mybtuuid"));			    		
-			    		Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :4" );
+			    		//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :4" );
 			    		mMaxChars = b.getInt("mybuffersize");
 			    		//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :5" );			    		
 			    		//if (mBTSocket == null || !mIsBluetoothConnected) {
@@ -171,7 +170,7 @@ public class NotificationSenderService extends Service
 			        	mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 			    		mMaxChars = b.getInt("mybuffersize");
 			    		mIsUserInitiatedDisconnect = b.getBoolean("userDisconnect");
-			    		Log.d("DisConnectBT", "disconnect");
+			    		//Log.d("DisConnectBT", "disconnect");
 			    		new DisConnectBT().execute();			    			
 			        }
 			        
@@ -190,7 +189,7 @@ public class NotificationSenderService extends Service
 			        if(action == CosmosMsg.SET_VIBRATION_LEVEL) {
 			        	mCurrentVibrationLevel = intent.getIntExtra(CosmosMsg.VLevel, R.id.vOff);
 			        	if(R.id.vOn == mCurrentVibrationLevel) {
-			        		writeCmdTowatch("SETNALARM=0,500");
+			        		writeCmdTowatch("SETNALARM=800,800");
 			        	} else {
 			        		writeCmdTowatch("SETNALARM=0,0");
 			        	}
@@ -210,12 +209,12 @@ public class NotificationSenderService extends Service
 			        	Formatter f = new Formatter();
 			        	String s = f.format("SETTIME=%d,%d,%d,%d,%d,%d,",
 			        			c.get(Calendar.YEAR),
-			        			c.get(Calendar.MONTH),
+			        			c.get(Calendar.MONTH)+1,
 			        			c.get(Calendar.DAY_OF_MONTH),
 			        			c.get(Calendar.HOUR),
 			        			c.get(Calendar.MINUTE),
 			        			c.get(Calendar.SECOND)).toString();
-			        	Log.d("SET_CURRENT_TIME", s);
+			        	//Log.d("SET_CURRENT_TIME", s);
 			        	writeCmdTowatch(s);
 			        	//writeTowatch("Test", "Test");
 			        }
@@ -223,7 +222,7 @@ public class NotificationSenderService extends Service
 			        if(action == "GOLDTEK_WATCH") {
 			        	String senderId = intent.getStringExtra("sender");
 			        	String messageBody = intent.getStringExtra("message");
-			        	Log.d(tag,"< sender: " + senderId+" Message :"+messageBody+" >");			        	
+			        	//Log.d(tag,"< sender: " + senderId+" Message :"+messageBody+" >");			        	
 			        	//writeTowatch( senderId, messageBody);
 			        	sendImage2Watch(160, 100, senderId, messageBody);
 			        } else {
@@ -260,7 +259,7 @@ public class NotificationSenderService extends Service
 			return;
 		}
 
-		Log.d(tag, title+"::"+content);
+		//Log.d(tag, title+"::"+content);
 		final int w = width;
 		final int h = height;
 		Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
@@ -313,8 +312,8 @@ public class NotificationSenderService extends Service
 								((Color.WHITE == pixels[w*r + i + 7])? 0:1)
 							);
 				} catch(Throwable e) {
-					Log.d("ERROR", e.getLocalizedMessage());
-					Log.d("ERROR", String.format("(%d, %d)", r, i));
+					//Log.d("ERROR", e.getLocalizedMessage());
+					//Log.d("ERROR", String.format("(%d, %d)", r, i));
 					break theLoop;
 				}
 			}
@@ -328,7 +327,7 @@ public class NotificationSenderService extends Service
 			mBTSocket.getOutputStream().write(binary);
 			mBTSocket.getOutputStream().write("\r\0".getBytes());
 		} catch(Throwable e) {
-			Log.d(tag, e.getLocalizedMessage());
+			//Log.d(tag, e.getLocalizedMessage());
 		}
 
 	}
@@ -395,11 +394,11 @@ public class NotificationSenderService extends Service
 						result = cursor.getString(DISPLAY_NAME_COLUMN_INDEX);
 					}
 				} catch(Throwable e) {
-					Log.d("", e.getLocalizedMessage());
+					//Log.d("", e.getLocalizedMessage());
 				}
 	        	incomingNumber = incomingNumber+"\n"+result;
 	            // phone ringing
-	            Log.i(TAG, "RINGING, number: " + incomingNumber);
+	            //Log.i(TAG, "RINGING, number: " + incomingNumber);
 	            
 	            //writeTowatch( "Call-in",incomingNumber );
 	            sendImage2Watch(160, 100, "Call-in",incomingNumber);
@@ -407,7 +406,7 @@ public class NotificationSenderService extends Service
 
 	        if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
 	            // active
-	            Log.i(TAG, "OFFHOOK");
+	            //Log.i(TAG, "OFFHOOK");
 
 	            isPhoneCalling = true;
 	        }
@@ -415,7 +414,7 @@ public class NotificationSenderService extends Service
 	        if (TelephonyManager.CALL_STATE_IDLE == state) {
 	            // run when class initial and phone call ended, need detect flag
 	            // from CALL_STATE_OFFHOOK
-	            Log.i(TAG, "IDLE number");
+	            //Log.i(TAG, "IDLE number");
 
 	            if (isPhoneCalling) {
 
@@ -428,7 +427,7 @@ public class NotificationSenderService extends Service
 	                    @Override
 	                    public void run() {
 	                        // get start of cursor
-	                          Log.i("CallLogDetailsActivity", "Getting Log activity...");
+	                          //Log.i("CallLogDetailsActivity", "Getting Log activity...");
 	                            String[] projection = new String[]{Calls.NUMBER};
 	                            Cursor cur = getContentResolver().query(Calls.CONTENT_URI, projection, null, null, Calls.DATE +" desc");
 	                            cur.moveToFirst();
@@ -476,7 +475,7 @@ public class NotificationSenderService extends Service
 						}
 						final String strInput = new String(buffer, 0, i);
 
-						Log.d("Recv", strInput);
+						//Log.d("Recv", strInput);
 
 						
 						//	TODO: parse the result
@@ -493,7 +492,7 @@ public class NotificationSenderService extends Service
 									SendVibrationLevel(R.id.vOn);
 								}
 							} catch(Throwable e) {
-								Log.d("VLevel", e.getLocalizedMessage());
+								//Log.d("VLevel", e.getLocalizedMessage());
 							}
 						}
 						
@@ -528,7 +527,7 @@ public class NotificationSenderService extends Service
 //						}
 
 					} else {
-						Log.d("DisConnectBT", "zzzzzzzzzzzzzzzzzzzzzzzzzz");
+						//Log.d("DisConnectBT", "zzzzzzzzzzzzzzzzzzzzzzzzzz");
 					}
 					Thread.sleep(500);
 				}
@@ -557,31 +556,31 @@ public class NotificationSenderService extends Service
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			Log.d("DisConnectBT", "doInBackground");
+			//Log.d("DisConnectBT", "doInBackground");
 
 			if (mReadThread != null) {
 				mReadThread.stop();
 				try {
 					mBTSocket.getOutputStream().write("SPP+STOP=\r\0".getBytes());
 				} catch (Throwable e) {
-					Log.d("DisConnectBT", e.getLocalizedMessage());
+					//Log.d("DisConnectBT", e.getLocalizedMessage());
 				}
 				while (mReadThread.isRunning()) {
 					; // Wait until it stops
 				}
-				Log.d("DisConnectBT", "xxxxxxxxxxxxxxxxxxx");
+				//Log.d("DisConnectBT", "xxxxxxxxxxxxxxxxxxx");
 				mReadThread = null;
-				Log.d("DisConnectBT", "Terminate ReadThread");
+				//Log.d("DisConnectBT", "Terminate ReadThread");
 			}
 
 			try {
 				if(null != mBTSocket) {
 					mBTSocket.close();
-					Log.d("DisConnectBT", "BT socket closed!");
+					//Log.d("DisConnectBT", "BT socket closed!");
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				Log.d("DisConnectBT", e.getLocalizedMessage());
+				//Log.d("DisConnectBT", e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 
@@ -591,7 +590,7 @@ public class NotificationSenderService extends Service
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			Log.d("DisConnectBT", "onPostExecute");
+			//Log.d("DisConnectBT", "onPostExecute");
 			mIsBluetoothConnected = false;
 			if (mIsUserInitiatedDisconnect) {
 				//finish(); TODO
@@ -622,10 +621,10 @@ public class NotificationSenderService extends Service
 					try {
 						mBTSocket.getOutputStream().write("SPP+STOP=\r\0".getBytes());
 					} catch (Throwable e) {
-						Log.d("DisConnectBT", e.getLocalizedMessage());
+						//Log.d("DisConnectBT", e.getLocalizedMessage());
 					}
 					while (mReadThread.isRunning()) {
-						Log.d("preDisconnect", "mReadThread.isRunning()"); // Wait until it stops
+						//Log.d("preDisconnect", "mReadThread.isRunning()"); // Wait until it stops
 					}
 					mReadThread = null;
 				}
@@ -638,7 +637,7 @@ public class NotificationSenderService extends Service
 				mBTSocket.connect();
 			} catch (IOException e) {
 				// Unable to connect to device
-				Log.d("Predisconnected", e.getLocalizedMessage());
+				//Log.d("Predisconnected", e.getLocalizedMessage());
 				e.printStackTrace();
 				mConnectSuccessful = false;
 			}
@@ -651,15 +650,14 @@ public class NotificationSenderService extends Service
 
 			if (!mConnectSuccessful) {
 				
-				Log.d(TAG,"Could not connect to device. " +
-						"Is it a Serial device? Also check if the UUID is correct in the settings" );
+				//Log.d(TAG,"Could not connect to device. " + "Is it a Serial device? Also check if the UUID is correct in the settings" );
 				//Toast.makeText(getApplicationContext(), "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
 				//finish(); TODO robin need to do something here
-				Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :4" );
+				//Log.d(TAG,"CONNECT_TO_BT >>>>>>>>>> :4" );
 
 			} else {
 				//msg("Connected to device");
-				Log.d(TAG,"Connected to device" );
+				//Log.d(TAG,"Connected to device" );
 				mIsBluetoothConnected = true;
 				mReadThread = new ReadInput(); // Kick off input reader
 
@@ -672,7 +670,7 @@ public class NotificationSenderService extends Service
 	}
 
     void SendConnState(boolean bConn) {
-    	Log.d(TAG, (bConn)?"Connected":"Disconnected");
+    	//Log.d(TAG, (bConn)?"Connected":"Disconnected");
     	Intent i = new Intent();
 		Bundle b = new Bundle();
 		b.putInt(CosmosMsg.msg, CosmosMsg.CONNECTION_STATUS_CHANGE);

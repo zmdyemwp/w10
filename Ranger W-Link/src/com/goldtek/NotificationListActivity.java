@@ -6,8 +6,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -44,10 +42,10 @@ public class NotificationListActivity extends ListActivity {
 		        	}
 		        }
 	        } catch (Throwable e) {
-	        	Log.d("AddStrings", e.getLocalizedMessage());
+	        	//Log.d("AddStrings", e.getLocalizedMessage());
 	        }
 		} catch (Throwable e) {
-			Log.d("MIN", e.getMessage());
+			//Log.d("MIN", e.getMessage());
 		}
 	}
 
@@ -68,7 +66,7 @@ public class NotificationListActivity extends ListActivity {
 			editor.putBoolean(lsa.getItem(position), l.getCheckedItemPositions().get(position));
 			editor.commit();
 		} catch (Throwable e) {
-			Log.d("onListItemClick", e.getLocalizedMessage());
+			//Log.d("onListItemClick", e.getLocalizedMessage());
 		}
 	}
 

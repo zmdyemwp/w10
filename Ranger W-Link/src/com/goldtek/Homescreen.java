@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -24,7 +22,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,7 +64,7 @@ public class Homescreen extends Activity {
 		
 		setContentView(R.layout.activity_homescreen);
 		ActivityHelper.initialize(this); //This is to ensure that the rotation persists across activities and not just this one
-		Log.d(TAG, "Created");
+		//Log.d(TAG, "Created");
 
 		mBtnSearch = (Button) findViewById(R.id.btnSearch);
 		mBtnConnect = (Button) findViewById(R.id.btnConnect);
@@ -171,12 +168,12 @@ public class Homescreen extends Activity {
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 			String uuid = prefs.getString("prefUuid", "Null");
 			mDeviceUUID = UUID.fromString(uuid);
-			Log.d(TAG, "UUID: " + uuid);
+			//Log.d(TAG, "UUID: " + uuid);
 			String bufSize = prefs.getString("prefTextBuffer", "Null");
 			mBufferSize = Integer.parseInt(bufSize);
 
 			String orientation = prefs.getString("prefOrientation", "Null");
-			Log.d(TAG, "Orientation: " + orientation);
+			//Log.d(TAG, "Orientation: " + orientation);
 			if (orientation.equals("Landscape")) {
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			} else if (orientation.equals("Portrait")) {

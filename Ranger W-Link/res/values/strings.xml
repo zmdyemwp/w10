@@ -24,7 +24,7 @@
     <string name="accessibility_service">Accessibility/Accessibility Service</string>
     <string name="accessibility_service_label">Ranger W-Link </string>
     <string name="accessibility_service_instructions"><b><i>
-        \n\n        Enable Ranger W-Link (Settings -> Accessibility -> GWatch).
+        \n\n        Enable Ranger W-Link (Settings -> Accessibility -> Ranger W-Link).
         \n\n        To get Notification from your social Network and Email
         \n\n               
         \n\n                    facebook twitter Whatsapp Line.
@@ -44,7 +44,7 @@
     <string name="disconnected">Disconnected</string>
     <string name="v_off">Off</string>
     <string name="v_on">On</string>
-    <string name="dialog_title">Select your GWatch</string>
+    <string name="dialog_title">Select your Watch</string>
     <string name="sync_time">Sync Time</string>
     <string name="notification">Notification</string>
 

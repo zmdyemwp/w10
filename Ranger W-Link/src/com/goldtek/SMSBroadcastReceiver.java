@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 
 
@@ -38,7 +37,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-             Log.i(TAG, "JMD >>>>>>>>>>>>>>>Intent recieved: " + intent.getAction());
+             //Log.i(TAG, "JMD >>>>>>>>>>>>>>>Intent recieved: " + intent.getAction());
                 //if (intent.getAction() == SMS_RECEIVED) {
                   if(intent.getAction().equals(SMS_RECEIVED)) {
                     Bundle bundle = intent.getExtras();
@@ -49,7 +48,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                             messages[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
                         }
                         if (messages.length > -1) {
-                            Log.i(TAG, "Message recieved: " + messages[0].getMessageBody());
+                            //Log.i(TAG, "Message recieved: " + messages[0].getMessageBody());
                             ///Toast.makeText(context, messages[0].getMessageBody().toString(), Toast.LENGTH_SHORT).show(); 
                             //MainActivity.forwardSMStowatch(messages[0].getMessageBody().toString());
                             Intent localIntent2 = new Intent(context, NotificationSenderService.class); 
@@ -61,7 +60,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                         }
                     }
                 } else if(intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)){
-                	Log.i(TAG, "JMD >>>>>>>>>>>>>>>Intent recieved: BT DISCONnECT ");
+                	//Log.i(TAG, "JMD >>>>>>>>>>>>>>>Intent recieved: BT DISCONnECT ");
                 	Intent i = new Intent();
             		Bundle b = new Bundle();
             		b.putInt(CosmosMsg.msg, CosmosMsg.CONNECTION_STATUS_CHANGE);

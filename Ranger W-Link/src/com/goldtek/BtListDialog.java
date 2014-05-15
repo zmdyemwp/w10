@@ -14,14 +14,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
-import com.goldtek.NewMainActivity;
 
 public class BtListDialog extends DialogFragment {
 	
@@ -94,7 +91,7 @@ public class BtListDialog extends DialogFragment {
 		{
 			String s1 = packageName;
 			String s2 = packageName + "." + className;
-			Log.d("disconnectFromDev", s1+"/"+s2);
+			//Log.d("disconnectFromDev", s1+"/"+s2);
 		}
 		ct.startService(localIntent3);
 		currentDev = null;
@@ -104,8 +101,7 @@ public class BtListDialog extends DialogFragment {
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			// TODO Auto-generated method stub
-			Log.d("Selected Bluetooth Device",
-					list.get(which).getName()+"<"+list.get(which).getAddress()+">");
+			//Log.d("Selected Bluetooth Device", list.get(which).getName()+"<"+list.get(which).getAddress()+">");
 			connect2Dev(list.get(which));
 			bSelectOne = true;
 		}
@@ -144,7 +140,7 @@ public class BtListDialog extends DialogFragment {
 	        d = builder.create();
 	        //d.getWindow().setBackgroundDrawableResource(R.drawable.dialog_box);
         } catch(Throwable e) {
-        	Log.d("onCreateDialog", e.getMessage());
+        	//Log.d("onCreateDialog", e.getMessage());
         }
         return d;
     }

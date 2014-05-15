@@ -1,9 +1,5 @@
 package com.goldtek;
 
-import java.util.List;
-
-import android.accessibilityservice.AccessibilityServiceInfo;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -14,13 +10,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
+import android.os.Handler;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -41,17 +38,51 @@ public class NewMainActivity extends Activity {
 		}
 	};
 	
+	Handler h = new Handler();
+	class VibrationCheckRun implements Runnable {
+
+		int id = 0;
+		public void setId(int i) { id = i; }
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			try {
+				((RadioButton)findViewById(id)).setChecked(true);
+			} catch(NullPointerException n) {
+			} catch(Throwable e) {
+			}
+		}
+		
+	}
+	VibrationCheckRun r = new VibrationCheckRun(); 
 	public void doRefresh(int msg, int value) {
-		Log.d("doRefresh", "msg:"+msg+",value:"+value);
+		//Log.d("doRefresh", "msg:"+msg+",value:"+value);
 		switch (msg) {
 		case CosmosMsg.CONNECTION_STATUS_CHANGE:
+			if(0 == value) {
+				findViewById(R.id.vOff).setEnabled(false);
+				findViewById(R.id.vOn).setEnabled(false);
+				this.rgVibration.check(-1);
+				findViewById(R.id.syncTime).setEnabled(false);
+			} else {
+				findViewById(R.id.vOff).setEnabled(true);
+				findViewById(R.id.vOn).setEnabled(true);
+				findViewById(R.id.syncTime).setEnabled(true);
+				this.doGetVibrationLevel();
+			}
 			tvConnection
 			.setText(this.getResources()
 					.getString((0 == value)?
 							R.string.disconnected:R.string.connected));
 			break;
 		case CosmosMsg.VIBRATION_LEVEL_CHANGE:
-			rgVibration.check(value);
+			//Log.d("VIBRATION_LEVEL_CHANGE", "VIBRATION_LEVEL_CHANGE::"+value);
+			try {
+				rgVibration.check(value);
+			} catch(Throwable e) {
+				//Log.d("VIBRATION_LEVEL_CHANGE", e.getLocalizedMessage());
+			}
 			break;
 		default:
 			break;
@@ -72,7 +103,7 @@ public class NewMainActivity extends Activity {
 		try {
 			registerReceiver(bcReceiver, new IntentFilter(CosmosMsg.notifyAction));
 		} catch(Throwable e) {
-			Log.d("registerReceiver", e.getLocalizedMessage());
+			//Log.d("registerReceiver", e.getLocalizedMessage());
 		}
 		
 		super.onCreate(savedInstanceState);
@@ -81,10 +112,11 @@ public class NewMainActivity extends Activity {
 		tvConnection = (TextView)findViewById(R.id.connState);
 		rgVibration = (RadioGroup)findViewById(R.id.vibrationOpt);
 		
-		View actionBarView = getLayoutInflater().inflate(R.layout.goldtek_action_bar, null);
+		/*View actionBarView = getLayoutInflater().inflate(R.layout.goldtek_action_bar, null);
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-		actionBar.setCustomView(actionBarView);
+		actionBar.setCustomView(actionBarView);*/
+
 		((Button)findViewById(R.id.Connect)).setOnClickListener(doConnect);
 		((Button)findViewById(R.id.Disconnect)).setOnClickListener(doDisconnect);
 		((Button)findViewById(R.id.syncTime)).setOnClickListener(doSyncTime);
@@ -95,7 +127,7 @@ public class NewMainActivity extends Activity {
 		((Button)findViewById(R.id.notifySet)).setOnClickListener(doNotification);
 		
 		this.doGetConnectionStatus();
-		this.doGetVibrationLevel();
+		//this.doGetVibrationLevel();	//	check level only as connected
 		
 		if( checkBTPower() ) {
 			checkAccessibility();
@@ -140,20 +172,50 @@ public class NewMainActivity extends Activity {
 	}
 
 	boolean checkAccessibility() {
-		AccessibilityManager am = (AccessibilityManager)getSystemService(Context.ACCESSIBILITY_SERVICE);
-		List<AccessibilityServiceInfo> list =
-				am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
-		Log.d("AccessibilityTest", "Count of List: "+list.size());
+		final String tag = "checkAccessibility";
 		boolean isEnabled = false;
+		String settingValue;
+		/*AccessibilityManager am = (AccessibilityManager)getSystemService(Context.ACCESSIBILITY_SERVICE);
+		List<AccessibilityServiceInfo> list =
+				//getEnabledAccessibilityServiceList(AccessibilityServiceInfo. FEEDBACK_ALL_MASK);
+				am.getInstalledAccessibilityServiceList();
+		Log.d(tag, "Count of List: "+list.size());
+
 		loop:
 		for(AccessibilityServiceInfo i:list) {
 			if("com.goldtek/.GoldtekService".equalsIgnoreCase(i.getId())) {
 				isEnabled = true;
 				break loop;
+			} else {
+				Log.d(tag, i.getId());
 			}
+		}*/
+		//final String gt_service = "com.goldtek/.GoldtekService";
+		final String gt_service = "com.goldtek/com.goldtek.GoldtekService";
+		try {
+			isEnabled = 1== Settings.Secure.getInt(this.getContentResolver(),
+					Settings.Secure.ACCESSIBILITY_ENABLED);
+			if(isEnabled) {
+				settingValue = Settings.Secure.getString(getContentResolver(),
+						Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+				if(null != settingValue) {
+					//Log.d(tag, settingValue+":"+gt_service);
+					isEnabled = settingValue.contains(gt_service);
+				} else {
+					isEnabled = false;
+				}
+			}
+		} catch (SettingNotFoundException s) {
+			//Log.d(tag, s.getLocalizedMessage());
+		} catch(NullPointerException n) {
+			//Log.d(tag, n.getLocalizedMessage());
+		} catch(Throwable e) {
+			//Log.d(tag, e.getLocalizedMessage());
 		}
+									
+		
 		if( !isEnabled ) {
-			Log.d("AccessibilityTest", "Popup Dialog");
+			//Log.d("AccessibilityTest", "Popup Dialog");
 			AlertDialog.Builder localBuilder = new AlertDialog.Builder(this);
 			localBuilder.setTitle("Notification Service")
 						.setMessage("Please enable this service to pass notification to watch.")
@@ -171,9 +233,9 @@ public class NewMainActivity extends Activity {
 						});
 	        localBuilder.create().show();
 		} else {
-			Log.d("AccessibilityTest", "Service is Enabled!");
+			//Log.d("AccessibilityTest", "Service is Enabled!");
 		}
-		Log.d("AccessibilityTest", "End of Process");
+		//Log.d("AccessibilityTest", "End of Process");
 		return isEnabled;
 	}
 
@@ -181,7 +243,7 @@ public class NewMainActivity extends Activity {
 		try {
 			unregisterReceiver(bcReceiver);
 		} catch(Throwable e) {
-			Log.d("unregisterReceiver", e.getLocalizedMessage());
+			//Log.d("unregisterReceiver", e.getLocalizedMessage());
 		}
 		super.onDestroy();
 	}
