@@ -24,24 +24,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-
-
-
-
-
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -98,7 +89,7 @@ public class MainActivity extends Activity {
 		mDeviceUUID = UUID.fromString(b.getString(Homescreen.DEVICE_UUID));
 		mMaxChars = b.getInt(Homescreen.BUFFER_SIZE);
 
-		Log.d(TAG, "Ready");
+		//Log.d(TAG, "Ready");
 
 		mBtnDisconnect = (Button) findViewById(R.id.btnDisconnect);
 		mBtnSend = (Button) findViewById(R.id.btnSend);
@@ -210,11 +201,11 @@ public class MainActivity extends Activity {
 		
 		try {
 			mBTSocket.getOutputStream().write(str.getBytes());
-			Log.i(TAG, "<<<<======== send sms done >>>");
+			//Log.i(TAG, "<<<<======== send sms done >>>");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			
-			Log.i(TAG, "<<<<======== send sms to spp failed>>>");
+			//Log.i(TAG, "<<<<======== send sms to spp failed>>>");
 			e.printStackTrace();
 		}
 		
@@ -348,7 +339,7 @@ public class MainActivity extends Activity {
 		if (mBTSocket != null && mIsBluetoothConnected) {
 			//new DisConnectBT().execute();
 		}
-		Log.d(TAG, "Paused");
+		//Log.d(TAG, "Paused");
 		super.onPause();
 	}
 
@@ -357,13 +348,13 @@ public class MainActivity extends Activity {
 		if (mBTSocket == null || !mIsBluetoothConnected) {
 			//new ConnectBT().execute();
 		}
-		Log.d(TAG, "Resumed");
+		//Log.d(TAG, "Resumed");
 		super.onResume();
 	}
 
 	@Override
 	protected void onStop() {
-		Log.d(TAG, "Stopped");
+		//Log.d(TAG, "Stopped");
 		super.onStop();
 	}
 

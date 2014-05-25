@@ -28,7 +28,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Notification;
 import android.app.Service;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +41,6 @@ import android.os.Parcelable;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -346,11 +344,11 @@ public class GoldtekService extends AccessibilityService {
 
     @Override
     public void onServiceConnected() {
-    	Log.d("ROBIN SINGH >>>>>>>>>>>>>>>> ","onServiceConnected ");
+    	//Log.d("ROBIN SINGH >>>>>>>>>>>>>>>> ","onServiceConnected ");
     	
-    	Log.v("ROBIN SINGH >>>>>>>>>>>>>>>> ", "onServiceConnected 1");
+    	//Log.v("ROBIN SINGH >>>>>>>>>>>>>>>> ", "onServiceConnected 1");
         super.onServiceConnected();
-        Log.v("ROBIN SINGH >>>>>>>>>>>>>>>> ", "onServiceConnected 2 ");
+       // Log.v("ROBIN SINGH >>>>>>>>>>>>>>>> ", "onServiceConnected 2 ");
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.flags = AccessibilityServiceInfo.DEFAULT;
         //info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
@@ -670,7 +668,7 @@ public class GoldtekService extends AccessibilityService {
     	
     	//Toast.makeText(this, "[GOLDTEK]Got event from " + event.getPackageName(), Toast.LENGTH_SHORT)
        // .show();
-    	Log.v(LOG_TAG,"=======HELLO welcome ========");
+    	//Log.v(LOG_TAG,"=======HELLO welcome ========");
     	
     	//Log.v(LOG_TAG, String.format(
          //       "JMD onAccessibilityEvent: [type] %s [class] %s [package] %s [time] %s [text] %s",
@@ -695,10 +693,10 @@ public class GoldtekService extends AccessibilityService {
         	//MainActivity.forwardSMStowatch(getEventText(event));
         	str1 = event.getPackageName().toString();
         	str2 = event.getText().toString();
-        	Log.d("NOTIFY", str1);
-        	Log.v(LOG_TAG,String.format("=======Message str2: (%s)", str2));
+        	//Log.d("NOTIFY", str1);
+        	//Log.v(LOG_TAG,String.format("=======Message str2: (%s)", str2));
         	str3 = str2.substring(1, -1 + str2.length());
-        	Log.v(LOG_TAG,"=======Message str3: "+str3);
+        	//Log.v(LOG_TAG,"=======Message str3: "+str3);
 			/*
 			if (str1.equalsIgnoreCase("jp.naver.line.android")) {
 				Log.v(LOG_TAG,"=======jp.naver.line.android=========");
@@ -714,30 +712,30 @@ public class GoldtekService extends AccessibilityService {
 				|| (str1.equalsIgnoreCase("com.android.email")) 
 				|| (str1.equalsIgnoreCase("com.motorola.blur.email"))) {
 				if (Build.VERSION.SDK_INT >= 16) {
-				Log.v(LOG_TAG,"=======> SDK=16 whatsapp, gm , gmail. htc.sec, =========");
+				//Log.v(LOG_TAG,"=======> SDK=16 whatsapp, gm , gmail. htc.sec, =========");
 					//str3 = str3 + getExtraBigData((Notification)localParcelable, str3, str1);
 				} else {
 					//str3 = str3 + getExtraData((Notification)localParcelable, str3, str1);
-					Log.v(LOG_TAG,"=======> SDK<16 whatsapp, gm , gmail. htc.sec, =========");
+					//Log.v(LOG_TAG,"=======> SDK<16 whatsapp, gm , gmail. htc.sec, =========");
 				}        	    	  
 			}
 			break;
         	
     	default:
-    		Log.d("NOTIFY", ""+eventType);
+    		//Log.d("NOTIFY", ""+eventType);
     		break;
         }
         //	check if the notification is required!
         String sender = shortendSenserNameFromPackage(str1);
         if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(sender, false)) {
-        	Log.d("NOTIFY", sender +"::"+ str3);
+        	//Log.d("NOTIFY", sender +"::"+ str3);
 	        Intent localIntent2 = new Intent(this, NotificationSenderService.class);
 	        localIntent2.setAction("GOLDTEK_WATCH");
 	        localIntent2.putExtra("sender", sender);
 	        localIntent2.putExtra("message", str3);
 	        startService(localIntent2);
         } else {
-			Log.d("onAccessibilityEvent", "This is NOT enabled");
+			//Log.d("onAccessibilityEvent", "This is NOT enabled");
         }
 
         //Log.i(LOG_TAG, mProvidedFeedbackType + " " + event.toString());

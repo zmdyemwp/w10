@@ -8,8 +8,6 @@ package com.goldtek;
 
 import java.util.Map;
 
-
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -55,7 +53,7 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 		Map<String, ?> keys = PreferenceManager.getDefaultSharedPreferences(this).getAll();
 
 		for (Map.Entry<String, ?> entry : keys.entrySet()) {
-			// Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+			// //Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
 			Preference pref = findPreference(entry.getKey());
 			if (pref != null) {
 				pref.setSummary(entry.getValue().toString());
